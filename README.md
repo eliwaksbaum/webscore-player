@@ -9,8 +9,8 @@ Use mxlparse.py to generate your JSON file:
 
 Then in your page's HTML:
 
-```
-<script src="/path/tp/WebscorePlayer.js"></script>
+```html
+<script src="/path/to/WebscorePlayer.js"></script>
 ...
 <div id="player"></div>
 ...
@@ -19,15 +19,15 @@ Then in your page's HTML:
 </script>
 ```
 
-Parameters to WebscoreInit:
-    1) the entire string of the JSON file produced by mxlparse.py.
-    2) an array of strings, the in-order paths to the SVG files of your score
-    3) a string, the path to the MP3 file of your score
+Parameters to `WebscoreInit()`:
+1.  The entire string of the JSON file produced by mxlparse.py.
+2.  An array of strings, the in-order paths to the SVG files of your score
+3.  The path to the MP3 file of your score
 
-### Known issues and further goals
-The way MuseScore exports its SVGs, grace notes are ordered after the notes they precede. This means grace 
-notes are highlighted for far longer than they should be, while the notes they precede just flicker for a 
-moment.
+## Known issues and further goals
+- The way MuseScore exports its SVGs, grace notes are ordered after the notes they precede. This means the primary note is highlighted first, for a moment, and then the grace 
+note is highlighted for the duration of the note.
+  - One solution could be to order the notes as part of the parsing process, instead of relying on MuseScore's exporting convention. This might lead to compatibility with other score-writing softwares.
 
-A solution might be to order the notes ourselves, instead of relying on MuseScore's exporting process. 
-This might lead to compatibility with other score-writing softwares.
+- I'm pretty sure the mxl contains all the data needed to implement the MuseScore feature where you can click on any note to start playback from that point. Since this isn't an 
+editor and I doubt people are playing along, this is a secondary goal that I might return to implement at a later date.
