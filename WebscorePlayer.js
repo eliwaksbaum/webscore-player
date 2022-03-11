@@ -247,6 +247,8 @@ class Page {
                     if (!this.flag) {
                         this.flag = true;
                         metronome.onTick = null;
+                        this.blackout();
+
                         if (curPage == displayPage) {
                             next();
                         }
