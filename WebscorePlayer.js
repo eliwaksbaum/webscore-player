@@ -68,7 +68,6 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     metronome = new Metronome();
 
     canvas = document.getElementById("player");
-    //canvas.style.width = "min-content";
     canvas.style.margin = "auto";
 
     let panel = document.createElement("div");
@@ -91,7 +90,6 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     panelsvg.getElementById("prev").addEventListener("click", prev);
 
     let sheetHolder = document.createElement("div");
-    //sheetHolder.style.height = "100vh";
     sheetHolder.className = "holder";
     sheetHolder.style.background = "white";
     sheetHolder.style.border = "3px black solid";
@@ -102,7 +100,6 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
         sheet.setAttribute("data", svgPaths[i]);
         sheet.setAttribute("type", "image/svg+xml");
         sheet.className = "sheet";
-        //sheet.style.height = "100vh";
         sheets.push(sheet);
         sheetHolder.appendChild(sheet);
     }                                       //let's all the pages pre-render i think, flipping without stutter
@@ -247,7 +244,6 @@ class Page {
                 cur.style.fill = "black";
 
                 if (cur.next >= this.parts[i].length) {
-                    console.log(this.flag);
                     if (!this.flag) {
                         this.flag = true;
                         metronome.onTick = null;
