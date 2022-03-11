@@ -218,7 +218,7 @@ class Page {
 
         for (let i = 0; i < this.parts.length; i++) {
             this.state[i] = this.buildME(this.parts[i], 0);
-            this.state[i]["style"].fill = blue;
+            this.state[i].style.fill = blue;
         }
         metronome.onTick = this.onTick;
     }
@@ -226,12 +226,13 @@ class Page {
     tick(dt) {
         for (let i = 0; i < this.parts.length; i++) {
             let cur = this.state[i];
-            cur["elapsed"] += dt;
+            cur.elapsed += dt;
 
-            if (cur["elapsed"] > cur["dur"]) {
-                cur["style"].fill = "black";
+            if (cur.elapsed > cur.dur) {
+                cur.style.fill = "black";
 
-                if (cur["next"] >= this.parts[i].length) {
+                if (cur.next >= this.parts[i].length) {
+                    console.log(this.flag);
                     if (!this.flag) {
                         this.flag = true;
                         metronome.onTick = null;
@@ -249,9 +250,9 @@ class Page {
                         }
                     }
                 } else {
-                    let next = this.buildME(this.parts[i], cur["next"]);
-                    next["elapsed"] = cur["elapsed"] - cur["dur"];
-                    next["style"].fill = blue;
+                    let next = this.buildME(this.parts[i], cur.next);
+                    next.elapsed = cur.elapsed - cur.dur;
+                    next.style.fill = blue;
                     this.state[i] = next;
                 }
             }
@@ -272,7 +273,7 @@ class Page {
 
     blackout() {
         for (let x of this.state) {
-            x["style"].fill = "black";
+            x.style.fill = "black";
         }
     }
 }
