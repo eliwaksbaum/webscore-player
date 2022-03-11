@@ -68,10 +68,10 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     metronome = new Metronome();
 
     canvas = document.getElementById("player");
-    canvas.style.width = "min-content";
+    //canvas.style.width = "min-content";
     canvas.style.margin = "auto";
 
-    var panel = document.createElement("div");
+    let panel = document.createElement("div");
     panel.innerHTML = panelHTML;
     panel.style.height = "fit-content";
     canvas.appendChild(panel);
@@ -90,25 +90,21 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     panelsvg.getElementById("next").addEventListener("click", next);
     panelsvg.getElementById("prev").addEventListener("click", prev);
 
-    let head = document.head || document.getElementsByTagName('head')[0];
-    let style = document.createElement('style');
-    style.innerHTML = `
-        #playbox:hover, #pausebox:hover, #stop:hover, #prev:hover, #next:hover {
-            cursor: pointer;
-        }
-    `
-    head.appendChild(style);
+    let sheetHolder = document.createElement("div");
+    //sheetHolder.style.height = "100vh";
+    sheetHolder.className = "holder";
+    sheetHolder.style.background = "white";
+    sheetHolder.style.border = "3px black solid";
+    canvas.appendChild(sheetHolder);
 
     for (let i = 0; i < numPages; i++) {
-        var sheet = document.createElement("object");
+        let sheet = document.createElement("object");
         sheet.setAttribute("data", svgPaths[i]);
         sheet.setAttribute("type", "image/svg+xml");
-        sheet.style.height = "100vh";
-        sheet.style.background = "white";
-        sheet.style.border = "3px black solid";
-        sheet.addEventListener("load", (e) => {e.preventDefault; console.log("yo");});
+        sheet.className = "sheet";
+        //sheet.style.height = "100vh";
         sheets.push(sheet);
-        canvas.appendChild(sheet);
+        sheetHolder.appendChild(sheet);
     }                                       //let's all the pages pre-render i think, flipping without stutter
     for (let i = 1; i < numPages; i++) {
         sheets[i].style.display = "none";
@@ -117,6 +113,25 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     music = document.createElement("audio");
     music.setAttribute("src", audiosrc);
     canvas.appendChild(music);
+
+    let head = document.head || document.getElementsByTagName('head')[0];
+    let style = document.createElement('style');
+    style.innerHTML = `
+        #playbox:hover, #pausebox:hover, #stop:hover, #prev:hover, #next:hover {
+            cursor: pointer;
+        }
+        #player {
+            width: min-content;
+        }
+        .sheet, .holder {
+            height: 100vh;
+        }
+        @media(max-width: 600px)  {
+            #player {width: 98%}
+            .sheet, .holder {width: 98%; height: auto}
+        }
+    `
+    head.appendChild(style);
 }
 
 function play() {
@@ -190,16 +205,16 @@ function pause() {
 
 function next() {
     if (displayPage + 1 < numPages) {
-        sheets[displayPage+1].style.display = "block";
         sheets[displayPage].style.display = "none";
         displayPage++;
+        sheets[displayPage].style.display = "block";
     }
 }
 function prev() {
     if (displayPage - 1 >= 0) {
-        sheets[displayPage-1].style.display = "block";
         sheets[displayPage].style.display = "none";
         displayPage--;
+        sheets[displayPage].style.display = "block";
     }
 }
 
