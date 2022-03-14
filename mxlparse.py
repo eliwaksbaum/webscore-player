@@ -3,13 +3,15 @@ import json
 import sys
 
 def parse(score):
-    pageStreams = layout.divideByPages(score).pages
+    page_streams = layout.divideByPages(score).pages
     
-    tempos = getTempos(pageStreams)
+    tempos = getTempos(page_streams)
     
     pages = []
-    for page in pageStreams:
-        parts = getParts(page, tempos)
+    time = 0
+    for page in page_streams:
+        parts = getParts(page, tempos, time)
+        time = parts[0][-1]["end"]
         pages.append(parts)
 
     return pages
@@ -28,55 +30,60 @@ def getTempos(pages):
 
     return tempos
 
-def getParts(page, tempos):
-    pageParts = page.getElementsByClass(stream.Part)
+def getParts(page, tempos, start_time):
+    page_parts = page.getElementsByClass(stream.Part)
     parts = []
-    curNote = 0
-    curRest = 0
+    cur_note = 0
+    cur_rest = 0
 
-    for i in range(len(pageParts) - 1, -1, -1):
-        part = pageParts[i]
-        curTempoIndex = 0
-        curTempo = tempos[0]
+    for i in range(len(page_parts) - 1, -1, -1):
+        part = page_parts[i]
+        cur_tempo_index = 0
+        cur_tempo = tempos[0]
+        cur_time = start_time
 
-        measureStreams = part.getElementsByClass(stream.Measure)
+        measure_streams = part.getElementsByClass(stream.Measure)
         measures = []
-        for i, measureStream in enumerate(measureStreams):
+        for i, ms in enumerate(measure_streams):
             
             measure = []
-            for me in measureStream.notesAndRests:
-                measureElement = {}
+            for me in ms.notesAndRests:
+                measure_element = {}
 
                 beat = (page.pageNumber, i, me.beat)
-                if curTempoIndex + 1 < len(tempos):
-                    if beat >= tempos[curTempoIndex + 1]["beat"] and beat != 0.1:
-                        curTempoIndex += 1
-                        curTempo = tempos[curTempoIndex]
+                if cur_tempo_index + 1 < len(tempos):
+                    if beat >= tempos[cur_tempo_index + 1]["beat"] and beat != 0.1:
+                        cur_tempo_index += 1
+                        cur_tempo = tempos[cur_tempo_index]
 
                 ql = me.duration.quarterLength
-                measureElement["duration"] = curTempo["metronome"].durationToSeconds(ql)
+                duration = cur_tempo["metronome"].durationToSeconds(ql)
+                measure_element["start"] = cur_time
+                cur_time += duration
+                measure_element["end"] = cur_time
+                
 
                 if me.isNote:
-                    index = curNote
-                    curNote += 1
-                    measureElement["class"] = "Note"
+                    index = cur_note
+                    cur_note += 1
+                    measure_element["class"] = "Note"
                 else:
-                    index = curRest
-                    curRest +=1
-                    measureElement["class"] = "Rest"
-                measureElement["index"] = index
+                    index = cur_rest
+                    cur_rest +=1
+                    measure_element["class"] = "Rest"
+                measure_element["index"] = index
             
-                measure.append(measureElement)
+                measure.append(measure_element)
         
             measures.append(measure)
 
-        partJStream = []
+        js_part = []
 
         exPart = repeat.Expander(part)
         for i in exPart.measureMap():
-            partJStream.extend(measures[i])
+            js_part.extend(measures[i])
             
-        parts.append(partJStream)
+        parts.append(js_part)
 
     return parts
 
