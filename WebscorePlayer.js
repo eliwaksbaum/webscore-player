@@ -158,30 +158,47 @@ function buildPage(data, i) {
 
     if (pages_built == data.length) {
         for (let starts of part_starts) {
-            starts.sort();
+            starts.sort((a, b) => a - b);
         }
     }
 }
 
-function timeHash(time, starts, lo, hi) {
+function timeHash(time, starts) {
+    let i_guess = innerHash(time, starts, 0, starts.length);
+    let hi = starts[i_guess + 1];
+    let mid = starts[i_guess];
+    let lo = starts[i_guess - 1];
+
+    if (time > hi) {
+        return hi;
+    }
+    else if (time > mid) {
+        return mid;
+    }
+    else {
+        return lo;
+    }
+}
+
+function innerHash(time, starts, lo, hi) {
     let mid = lo + Math.floor((hi-lo)/2)
     let guess = starts[mid];
 
     if (time == guess || hi == lo) {
-        return guess;
+        return mid;
     }
     else if (time < guess) {
-        return timeHash(time, starts, lo, mid - 1);
+        return innerHash(time, starts, lo, mid - 1);
     }
     else {
-        return timeHash(time, starts, mid + 1, hi);
+        return innerHash(time, starts, mid + 1, hi);
     }
 }
 
 function getElementsFromTime(time) {
     let elements = new Array(parts.length);
     for (let i = 0; i < parts.length; i++) {
-        let key = timeHash(time, part_starts[i], 0, part_starts[i].length);
+        let key = timeHash(time, part_starts[i]);
         elements[i] = parts[i][key];
     }
     return elements;
