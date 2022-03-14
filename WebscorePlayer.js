@@ -218,6 +218,12 @@ function colorElements(olds, news) {
 
 function tick() {
     let news = getElementsFromTime(music.currentTime);
+    if (music.currentTime = music.duration) {
+        news = [];
+        play_button.style.fill = gray;
+        play_button.style.stroke = gray;
+    }
+
     colorElements(cur_elements, news);
     cur_elements = news;
 
