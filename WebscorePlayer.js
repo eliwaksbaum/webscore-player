@@ -2,27 +2,26 @@ var canvas;
 var sheets = [];
 var music;
 
-var pageDatas;
-var svgPaths;
-var numPages;
-var displayPage = 0;
+var pages_JSON;
+var svg_paths;
+var display_page = 0;
 
-var pageObjs = [];
-var curPage = 0;
+var pages;
+var cur_page = 0;
 var timeouts = [];
 
-var isPlaying = false;
-var isPaused = false;
+var is_playing = false;
+var is_paused = false;
 var metronome;
 
-var playButton;
-var pauseButton;
-var stopButton;
+var play_button;
+var pause_button;
+var stop_button;
 
 var blue = "#0643f9";
 var gray = "#2e2e2e";
 
-var panelHTML = `
+var panel_HTML = `
 <svg width="293.3mm" height="27.933mm" version="1.1" viewBox="0 0 293.3 27.933" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width:90%; height: fit-content; margin-left: 5%">
  <defs>
   <linearGradient id="linearGradient1179" x1="89.079" x2="89.079" y1="59.538" y2="36.208" gradientTransform="matrix(1.3447 0 0 1.0775 -263.48 43.799)" gradientUnits="userSpaceOnUse">
@@ -61,30 +60,29 @@ var panelHTML = `
 `
 
 function WebscoreInit(json, svgsrcs, audiosrc) {
-    pageDatas = JSON.parse(json);
-    svgPaths = svgsrcs;
-    numPages = pageDatas.length;
-    pageObjs = new Array(numPages);
+    let data = JSON.parse(json);
+    pages = new Array(data.length);
+    svg_paths = svgsrcs;
     metronome = new Metronome();
 
     canvas = document.getElementById("player");
     canvas.style.margin = "auto";
 
     let panel = document.createElement("div");
-    panel.innerHTML = panelHTML;
+    panel.innerHTML = panel_HTML;
     panel.style.height = "fit-content";
     canvas.appendChild(panel);
 
     panelsvg = panel.getElementsByTagName("svg")[0];
 
-    playButton = panelsvg.getElementById("play");
+    play_button = panelsvg.getElementById("play");
     panelsvg.getElementById("playbox").addEventListener("click", play);
 
-    pauseButton = panelsvg.getElementById("pause");
+    pause_button = panelsvg.getElementById("pause");
     panelsvg.getElementById("pausebox").addEventListener("click", pause);
 
-    stopButton = panelsvg.getElementById("stop");
-    stopButton.addEventListener("click", stop);
+    stop_button = panelsvg.getElementById("stop");
+    stop_button.addEventListener("click", stop);
 
     panelsvg.getElementById("next").addEventListener("click", next);
     panelsvg.getElementById("prev").addEventListener("click", prev);
@@ -95,15 +93,17 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     sheetHolder.style.border = "3px black solid";
     canvas.appendChild(sheetHolder);
 
-    for (let i = 0; i < numPages; i++) {
+    for (let i = 0; i < data.length; i++) {
         let sheet = document.createElement("object");
-        sheet.setAttribute("data", svgPaths[i]);
+        sheet.setAttribute("data", svg_paths[i]);
         sheet.setAttribute("type", "image/svg+xml");
         sheet.className = "sheet";
         sheets.push(sheet);
         sheetHolder.appendChild(sheet);
-    }                                       //let's all the pages pre-render i think, flipping without stutter
-    for (let i = 1; i < numPages; i++) {
+
+        sheet.addEventListener("load", () => {pages[i] = buildPage(data, i)});
+    }                                       //two passes let's all the pages pre-render i think, flipping without stutter
+    for (let i = 1; i < data.length; i++) {
         sheets[i].style.display = "none";
     }
 
@@ -131,97 +131,112 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     head.appendChild(style);
 }
 
+function buildPage(data, i) {
+    let page_data = data[i];
+    let page = [];
+    let page_SVG = sheets[i].contentDocument.getElementsByTagName("svg")[0];
+    let svg_arrays = {"Note": page_SVG.getElementsByClassName("Note"), "Rest": page_SVG.getElementsByClassName("Rest")};
+    for (let part_data of page_data) {
+        let part = [];
+        for (let measure_element of part_data) {                
+            let style = svg_arrays[measure_element.class][measure_element.index].style;
+            part.push({"start": measure_element.start, "end": measure_element.end, "style": style});
+        }
+        page.push(part);
+    }
+    return page;
+}
+
 function play() {
-    if (!isPlaying) {
-        playButton.style.fill = blue;
-        playButton.style.stroke = blue;
+    if (!is_playing) {
+        play_button.style.fill = blue;
+        play_button.style.stroke = blue;
 
-        if (isPaused) {
-            pauseButton.style.fill = gray;
-            pauseButton.style.stroke = gray;
+        if (is_paused) {
+            pause_button.style.fill = gray;
+            pause_button.style.stroke = gray;
 
-            isPaused = false;
+            is_paused = false;
             metronome.resume();
         } else {
-            if (displayPage != curPage) {
-                sheets[curPage].style.display = "block";
-                sheets[displayPage].style.display = "none";
-                displayPage = curPage;
+            if (display_page != cur_page) {
+                sheets[cur_page].style.display = "block";
+                sheets[display_page].style.display = "none";
+                display_page = cur_page;
             }
 
             pagePlay();
             metronome.start();
         }
 
-        isPlaying = true;
+        is_playing = true;
         music.play();
     }
 }
 
 function pagePlay() {
-    if (pageObjs[curPage] == null) {
-        pageObjs[curPage] = new Page(curPage);
+    if (page_objs[cur_page] == null) {
+        page_objs[cur_page] = new Page(cur_page);
     }
-    pageObjs[curPage].play();
+    page_objs[cur_page].play();
 }
 
 function stop() {
     music.pause();
     music.currentTime = 0;
-    pageObjs[curPage].stop();
-    isPlaying = false;
-    isPaused = false;
+    page_objs[cur_page].stop();
+    is_playing = false;
+    is_paused = false;
 
-    playButton.style.fill = gray;
-    playButton.style.stroke = gray;
-    pauseButton.style.fill = gray;
-    pauseButton.style.stroke = gray;
+    play_button.style.fill = gray;
+    play_button.style.stroke = gray;
+    pause_button.style.fill = gray;
+    pause_button.style.stroke = gray;
 
-    if (displayPage != 0) {
+    if (display_page != 0) {
         sheets[0].style.display = "block"
-        sheets[displayPage].style.display = "none";
+        sheets[display_page].style.display = "none";
     }
-    curPage = 0;
-    displayPage = 0;
+    cur_page = 0;
+    display_page = 0;
 
     metronome.stop();
 }
 
 function pause() {
-    if (isPlaying && !isPaused) {
-        playButton.style.fill = gray;
-        playButton.style.stroke = gray;
-        pauseButton.style.fill = blue;
-        pauseButton.style.stroke = blue;
+    if (is_playing && !is_paused) {
+        play_button.style.fill = gray;
+        play_button.style.stroke = gray;
+        pause_button.style.fill = blue;
+        pause_button.style.stroke = blue;
 
-        isPlaying = false;
-        isPaused = true;
+        is_playing = false;
+        is_paused = true;
         metronome.pause();
     }
 }
 
 function next() {
-    if (displayPage + 1 < numPages) {
-        sheets[displayPage].style.display = "none";
-        displayPage++;
-        sheets[displayPage].style.display = "block";
+    if (display_page + 1 < pages.length) {
+        sheets[display_page].style.display = "none";
+        display_page++;
+        sheets[display_page].style.display = "block";
     }
 }
 function prev() {
-    if (displayPage - 1 >= 0) {
-        sheets[displayPage].style.display = "none";
-        displayPage--;
-        sheets[displayPage].style.display = "block";
+    if (display_page - 1 >= 0) {
+        sheets[display_page].style.display = "none";
+        display_page--;
+        sheets[display_page].style.display = "block";
     }
 }
 
 class Page {
     constructor(num) {
-        this.pageSVG = sheets[num].contentDocument.getElementsByTagName("svg")[0];
-        this.svgArrays = {"Note": this.pageSVG.getElementsByClassName("Note"), "Rest": this.pageSVG.getElementsByClassName("Rest")};
-        this.parts = pageDatas[num];
+        
+        this.parts = buildParts(num);
         this.flag = false;
-        this.state = [];
+        //this.elements = buildMEs;
         this.onTick = (dt) => {this.tick(dt);};
     }
 
@@ -249,17 +264,17 @@ class Page {
                         metronome.onTick = null;
                         this.blackout();
 
-                        if (curPage == displayPage) {
+                        if (cur_page == display_page) {
                             next();
                         }
-                        if (curPage + 1 < numPages) {
-                            curPage++;
+                        if (cur_page + 1 < pages.length) {
+                            cur_page++;
                             pagePlay();
                         } else {
-                            curPage = 0;
-                            isPlaying = false;
-                            playButton.style.fill = gray;
-                            playButton.style.stroke = gray;
+                            cur_page = 0;
+                            is_playing = false;
+                            play_button.style.fill = gray;
+                            play_button.style.stroke = gray;
                         }
                     }
                 } else {
@@ -272,7 +287,9 @@ class Page {
         }
     }
 
-    buildME(data, i) {
+    buildParts() {
+        let parts = [];
+
         let measureElement = data[i];
         let meStyle = this.svgArrays[measureElement.class][measureElement.index].style;
         let duration = measureElement.duration*1000;
