@@ -25,10 +25,9 @@ Parameters to `WebscoreInit()`:
 3.  The path to the MP3 file of your score
 
 ## Known issues and further goals
-- The way MuseScore exports its SVGs, grace notes are ordered after the notes they precede. This means the primary note is highlighted first, for a moment, and then the grace 
-note is highlighted for the duration of the note.
-- Similary, MuseScore will occasionally just mess up the ordering of some notes for no reason I can discern. Once caught, this can usually be fixed by cutting and pasting the whole score in place.
+- This tool assumes a certain ordering of SVG elements. MuseScore is anything but consistent when exporting, though, so it can be difficult to get the right format. Usually, cutting all the notes into another file and then pasting them back part by part, bottom to top, will do the trick.
+- Similary, grace notes are ordered after the notes they precede. This means the primary note is highlighted first, for a moment, and then the grace note is highlighted for the duration of the note.
   - One solution could be to order the notes as part of the parsing process, instead of relying on MuseScore's exporting convention. This might lead to compatibility with other score-writing softwares.
 
-- I'm pretty sure the mxl contains all the data needed to implement the MuseScore feature where you can click on any note to start playback from that point. Since this isn't an 
+- The MuseScore feature where you can click on any note to start playback from that point is definitely possible. Since this isn't an 
 editor and I doubt people are playing along, this is a secondary goal that I might return to implement at a later date.
