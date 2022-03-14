@@ -2,11 +2,12 @@ var canvas;
 var sheets = [];
 var music;
 
-var pages_JSON;
 var svg_paths;
 var display_page = 0;
 
-var pages;
+var pages_built = 0;
+var parts;
+var part_starts;
 var cur_page = 0;
 var timeouts = [];
 
@@ -18,6 +19,7 @@ var play_button;
 var pause_button;
 var stop_button;
 
+var cur_styles;
 var blue = "#0643f9";
 var gray = "#2e2e2e";
 
@@ -61,7 +63,9 @@ var panel_HTML = `
 
 function WebscoreInit(json, svgsrcs, audiosrc) {
     let data = JSON.parse(json);
-    pages = new Array(data.length);
+    parts = new Array(data[0].length).fill({});
+    part_starts = new Array(data[0].length).fill([]);
+    cur_styles = new Array(data[0].length); //number of parts
     svg_paths = svgsrcs;
     metronome = new Metronome();
 
@@ -101,7 +105,7 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
         sheets.push(sheet);
         sheetHolder.appendChild(sheet);
 
-        sheet.addEventListener("load", () => {pages[i] = buildPage(data, i)});
+        sheet.addEventListener("load", () => {buildPage(data, i)});
     }                                       //two passes let's all the pages pre-render i think, flipping without stutter
     for (let i = 1; i < data.length; i++) {
         sheets[i].style.display = "none";
@@ -132,19 +136,48 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
 }
 
 function buildPage(data, i) {
+    pages_built++;
     let page_data = data[i];
-    let page = [];
     let page_SVG = sheets[i].contentDocument.getElementsByTagName("svg")[0];
     let svg_arrays = {"Note": page_SVG.getElementsByClassName("Note"), "Rest": page_SVG.getElementsByClassName("Rest")};
-    for (let part_data of page_data) {
-        let part = [];
+    for (let i = 0; i < page_data.length; i++) {
+        let part_data = page_data[i];
         for (let measure_element of part_data) {                
             let style = svg_arrays[measure_element.class][measure_element.index].style;
-            part.push({"start": measure_element.start, "end": measure_element.end, "style": style});
+            parts[i][measure_element.start] = {"style": style, "page": i};
+            part_starts[i].push(measure_element.start);
         }
-        page.push(part);
     }
-    return page;
+
+    if (pages_built == data.length) {
+        for (let starts of part_starts) {
+            starts.sort();
+        }
+    }
+}
+
+function timeHash(time, starts, lo, hi) {
+    let mid = lo + Math.floor((hi-lo)/2)
+    let guess = starts[mid];
+
+    if (time == guess || hi == lo) {
+        return guess;
+    }
+    else if (time < guess) {
+        return timeHash(time, starts, lo, mid - 1);
+    }
+    else {
+        return timeHash(time, starts, mid + 1, hi);
+    }
+}
+
+function getElementsFromTime(time) {
+    let elements = new Array(parts.length);
+    for (let i = 0; i < parts.length; i++) {
+        let key = timeHash(time, part_starts[i], 0, part_starts[i].length);
+        elements[i] = parts[i][key];
+    }
+    return elements;
 }
 
 function play() {
@@ -228,6 +261,16 @@ function prev() {
         sheets[display_page].style.display = "none";
         display_page--;
         sheets[display_page].style.display = "block";
+    }
+}
+
+function getElementsFromTime(time) {
+
+}
+
+function checkPlace() {
+    for (let i = 0; i < cur_styles.length; i++) {
+
     }
 }
 
