@@ -69,7 +69,8 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
         for (let i = 0; i < parts.length; parts[i++] = {});
     part_starts = new Array(data[0].length);
         for (let i = 0; i < part_starts.length; part_starts[i++] = []);
-    page_inits = new Array(data.length).fill(new Array(data[0].length));
+    page_inits = new Array(data.length);
+        for (let i = 0; i < page_inits.length; page_inits[i++] = new Array(data[0].length));
     cur_elements = new Array(data[0].length);
     svg_paths = svgsrcs;
 
@@ -218,10 +219,11 @@ function colorElements(olds, news) {
 
 function tick() {
     let news = getElementsFromTime(music.currentTime);
-    if (music.currentTime = music.duration) {
+    if (music.currentTime == music.duration) {
         news = [];
         play_button.style.fill = gray;
         play_button.style.stroke = gray;
+        window.clearInterval(interval);
     }
 
     colorElements(cur_elements, news);

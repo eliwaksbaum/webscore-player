@@ -10,8 +10,9 @@ def parse(score):
     pages = []
     time = 0
     for page in page_streams:
-        parts = getParts(page, tempos, time)
-        time = parts[0][-1]["end"]
+        pt = getParts(page, tempos, time)
+        parts = pt[0]
+        time = pt[1]
         pages.append(parts)
 
     return pages
@@ -35,17 +36,16 @@ def getParts(page, tempos, start_time):
     parts = []
     cur_note = 0
     cur_rest = 0
+    end = 0
 
     for i in range(len(page_parts) - 1, -1, -1):
         part = page_parts[i]
         cur_tempo_index = 0
         cur_tempo = tempos[0]
-        cur_time = start_time
+        untimed_part = []
 
         measure_streams = part.getElementsByClass(stream.Measure)
-        measures = []
         for i, ms in enumerate(measure_streams):
-            
             measure = []
             for me in ms.notesAndRests:
                 measure_element = {}
@@ -58,9 +58,7 @@ def getParts(page, tempos, start_time):
 
                 ql = me.duration.quarterLength
                 duration = cur_tempo["metronome"].durationToSeconds(ql)
-                measure_element["start"] = cur_time
-                cur_time += duration
-                measure_element["end"] = cur_time
+                measure_element["duration"] = duration
 
                 if me.isNote:
                     index = cur_note
@@ -73,18 +71,31 @@ def getParts(page, tempos, start_time):
                 measure_element["index"] = index
             
                 measure.append(measure_element)
-        
-            measures.append(measure)
 
-        js_part = []
-
-        exPart = repeat.Expander(part)
-        for i in exPart.measureMap():
-            js_part.extend(measures[i])
+            untimed_part.append(measure)
             
+        measure_map = repeat.Expander(part).measureMap()
+        je = setStarts(untimed_part, measure_map, start_time)
+        js_part = je[0]
+        end = je[1]
         parts.append(js_part)
 
-    return parts
+    return (parts, end)
+
+def setStarts(measures, map, start):
+    part = []
+    cur_time = start
+
+    print(map)
+
+    for i in map:
+        for me in measures[i]:
+            jsme = {"start": cur_time, "index": me["index"], "class": me["class"]}
+            cur_time += me["duration"]
+            part.append(jsme)
+
+    last_end = cur_time + measures[map[-1]][-1]["duration"]
+    return (part, last_end)
 
 score = converter.parse(sys.argv[1])
 pages = parse(score)
