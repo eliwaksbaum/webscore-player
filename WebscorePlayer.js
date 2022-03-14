@@ -65,8 +65,10 @@ var panel_HTML = `
 function WebscoreInit(json, svgsrcs, audiosrc) {
     let data = JSON.parse(json);
     num_pages = data.length;
-    parts = new Array(data[0].length).fill({});          //data[0].length is number of parts, data.length is number of pages
-    part_starts = new Array(data[0].length).fill([]);
+    parts = new Array(data[0].length);          //data[0].length is number of parts, data.length is number of pages
+        for (let i = 0; i < parts.length; parts[i++] = {});
+    part_starts = new Array(data[0].length);
+        for (let i = 0; i < part_starts.length; part_starts[i++] = []);
     page_inits = new Array(data.length).fill(new Array(data[0].length));
     cur_elements = new Array(data[0].length);
     svg_paths = svgsrcs;
@@ -137,22 +139,22 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     head.appendChild(style);
 }
 
-function buildPage(data, i) {
+function buildPage(data, page_num) {
     pages_built++;
-    let page_data = data[i];
-    let page_SVG = sheets[i].contentDocument.getElementsByTagName("svg")[0];
+    let page_data = data[page_num];
+    let page_SVG = sheets[page_num].contentDocument.getElementsByTagName("svg")[0];
     let svg_arrays = {"Note": page_SVG.getElementsByClassName("Note"), "Rest": page_SVG.getElementsByClassName("Rest")};
-    for (let j = 0; j < page_data.length; j++) {
-        let part_data = page_data[j];
+    for (let i = 0; i < page_data.length; i++) {
+        let part_data = page_data[i];
         let first = true;
         for (let measure_element of part_data) {                
             let style = svg_arrays[measure_element.class][measure_element.index].style;
-            parts[j][measure_element.start] = {"style": style, "page": i};
-            part_starts[j].push(measure_element.start);
+            parts[i][measure_element.start] = {"style": style, "page": page_num};
+            part_starts[i].push(measure_element.start);
 
             if (first) {
                 first = false;
-                page_inits[i][j] = {"style": style, "page": i};
+                page_inits[page_num][i] = {"style": style, "page": page_num};
             }
         }
     }
