@@ -60,6 +60,7 @@ def getParts(page, tempos, start_time):
                 duration = cur_tempo["metronome"].durationToSeconds(ql)
                 measure_element["start"] = cur_time
                 cur_time += duration
+                measure_element["end"] = cur_time
 
                 if me.isNote:
                     index = cur_note
