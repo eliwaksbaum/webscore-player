@@ -185,7 +185,7 @@ function innerHash(time, starts, lo, hi) {
     let mid = lo + Math.floor((hi-lo)/2)
     let guess = starts[mid];
 
-    if (time == guess || hi == lo) {
+    if (time == guess || hi <= lo) {
         return mid;
     }
     else if (time < guess) {
