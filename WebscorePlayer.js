@@ -5,12 +5,12 @@ var music;
 var svg_paths;
 var display_page = 0;
 
+var num_pages;
 var pages_built = 0;
 var parts;                  //a list of part objects, keys are the measure elements' starts and values are {style, pagenum}
 var part_starts;            //a list of part lists, all of the measure elements' starts
 var page_inits;            //page_inits[0][1] gives the style of the first measure element in the second part on the first page
 var cur_page = 0;
-var timeouts = [];
 
 var is_playing = false;
 var is_paused = false;
@@ -64,6 +64,7 @@ var panel_HTML = `
 
 function WebscoreInit(json, svgsrcs, audiosrc) {
     let data = JSON.parse(json);
+    num_pages = data.length;
     parts = new Array(data[0].length).fill({});          //data[0].length is number of parts, data.length is number of pages
     part_starts = new Array(data[0].length).fill([]);
     page_inits = new Array(data.length).fill(new Array(data[0].length));
@@ -287,7 +288,7 @@ function pause() {
 }
 
 function next() {
-    if (display_page + 1 < pages.length) {
+    if (display_page + 1 < num_pages) {
         sheets[display_page].style.display = "none";
         display_page++;
         sheets[display_page].style.display = "block";
