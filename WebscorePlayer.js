@@ -300,15 +300,15 @@ class Metronome {
     }
 
     tick() {
-        let dt = Date.now() - this.t0;
+        let dt = music.currentTime - this.t0;
         if (this.onTick != null) {
             this.onTick(dt);
         }
-        this.t0 = Date.now();
+        this.t0 = music.currentTime;
     }
 
     start() {
-        this.t0 = Date.now();
+        this.t0 = music.currentTime;
         this.int = window.setInterval(() => {this.tick();}, 50);
     }
 
@@ -326,7 +326,7 @@ class Metronome {
     }
 
     resume() {
-        this.t0 = Date.now();
+        this.t0 = music.currentTime;
         this.onTick = this.tickache;
         this.int = window.setInterval(() => {this.tick();}, 50);
     }
