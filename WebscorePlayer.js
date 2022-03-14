@@ -6,20 +6,21 @@ var svg_paths;
 var display_page = 0;
 
 var pages_built = 0;
-var parts;
-var part_starts;
+var parts;                  //a list of part objects, keys are the measure elements' starts and values are {style, pagenum}
+var part_starts;            //a list of part lists, all of the measure elements' starts
+var page_inits;            //page_inits[0][1] gives the style of the first measure element in the second part on the first page
 var cur_page = 0;
 var timeouts = [];
 
 var is_playing = false;
 var is_paused = false;
-var metronome;
+var interval;
 
 var play_button;
 var pause_button;
 var stop_button;
 
-var cur_styles;
+var cur_elements;
 var blue = "#0643f9";
 var gray = "#2e2e2e";
 
@@ -63,11 +64,11 @@ var panel_HTML = `
 
 function WebscoreInit(json, svgsrcs, audiosrc) {
     let data = JSON.parse(json);
-    parts = new Array(data[0].length).fill({});
+    parts = new Array(data[0].length).fill({});          //data[0].length is number of parts, data.length is number of pages
     part_starts = new Array(data[0].length).fill([]);
-    cur_styles = new Array(data[0].length); //number of parts
+    page_inits = new Array(data.length).fill(new Array(data[0].length));
+    cur_elements = new Array(data[0].length);
     svg_paths = svgsrcs;
-    metronome = new Metronome();
 
     canvas = document.getElementById("player");
     canvas.style.margin = "auto";
@@ -140,12 +141,18 @@ function buildPage(data, i) {
     let page_data = data[i];
     let page_SVG = sheets[i].contentDocument.getElementsByTagName("svg")[0];
     let svg_arrays = {"Note": page_SVG.getElementsByClassName("Note"), "Rest": page_SVG.getElementsByClassName("Rest")};
-    for (let i = 0; i < page_data.length; i++) {
-        let part_data = page_data[i];
+    for (let j = 0; j < page_data.length; j++) {
+        let part_data = page_data[j];
+        let first = true;
         for (let measure_element of part_data) {                
             let style = svg_arrays[measure_element.class][measure_element.index].style;
-            parts[i][measure_element.start] = {"style": style, "page": i};
-            part_starts[i].push(measure_element.start);
+            parts[j][measure_element.start] = {"style": style, "page": i};
+            part_starts[j].push(measure_element.start);
+
+            if (first) {
+                first = false;
+                page_inits[i][j] = {"style": style, "page": i};
+            }
         }
     }
 
@@ -180,6 +187,26 @@ function getElementsFromTime(time) {
     return elements;
 }
 
+function colorElements(olds, news) {
+    for (let old of olds) {
+        old.style.fill = "black";
+    }
+    for (let nu of news) {
+        nu.style.fill = blue;
+    }
+}
+
+function tick() {
+    let news = getElementsFromTime(music.currentTime);
+    colorElements(cur_elements, news);
+    cur_elements = news;
+
+    if (news[0].page != cur_page && cur_page == display_page) {
+        cur_page++;
+        next();
+    }
+}
+
 function play() {
     if (!is_playing) {
         play_button.style.fill = blue;
@@ -190,34 +217,26 @@ function play() {
             pause_button.style.stroke = gray;
 
             is_paused = false;
-            metronome.resume();
         } else {
             if (display_page != cur_page) {
                 sheets[cur_page].style.display = "block";
                 sheets[display_page].style.display = "none";
                 display_page = cur_page;
             }
-
-            pagePlay();
-            metronome.start();
+            for (let i = 0; i < cur_elements.length; i++) {
+                cur_elements[i] = page_inits[cur_page][i];
+            }
         }
 
         is_playing = true;
         music.play();
+        interval = window.setInterval(tick, 50);
     }
-}
-
-function pagePlay() {
-    if (page_objs[cur_page] == null) {
-        page_objs[cur_page] = new Page(cur_page);
-    }
-    page_objs[cur_page].play();
 }
 
 function stop() {
     music.pause();
     music.currentTime = 0;
-    page_objs[cur_page].stop();
     is_playing = false;
     is_paused = false;
 
@@ -233,7 +252,7 @@ function stop() {
     cur_page = 0;
     display_page = 0;
 
-    metronome.stop();
+    window.clearInterval(interval);
 }
 
 function pause() {
@@ -245,7 +264,8 @@ function pause() {
 
         is_playing = false;
         is_paused = true;
-        metronome.pause();
+        window.clearInterval(interval);
+        music.pause();
     }
 }
 
@@ -261,133 +281,5 @@ function prev() {
         sheets[display_page].style.display = "none";
         display_page--;
         sheets[display_page].style.display = "block";
-    }
-}
-
-function getElementsFromTime(time) {
-
-}
-
-function checkPlace() {
-    for (let i = 0; i < cur_styles.length; i++) {
-
-    }
-}
-
-class Page {
-    constructor(num) {
-        
-        this.parts = buildParts(num);
-        this.flag = false;
-        //this.elements = buildMEs;
-        this.onTick = (dt) => {this.tick(dt);};
-    }
-
-    play() {
-        this.flag = false;
-
-        for (let i = 0; i < this.parts.length; i++) {
-            this.state[i] = this.buildME(this.parts[i], 0);
-            this.state[i].style.fill = blue;
-        }
-        metronome.onTick = this.onTick;
-    }
-
-    tick(dt) {
-        for (let i = 0; i < this.parts.length; i++) {
-            let cur = this.state[i];
-            cur.elapsed += dt;
-
-            if (cur.elapsed > cur.dur) {
-                cur.style.fill = "black";
-
-                if (cur.next >= this.parts[i].length) {
-                    if (!this.flag) {
-                        this.flag = true;
-                        metronome.onTick = null;
-                        this.blackout();
-
-                        if (cur_page == display_page) {
-                            next();
-                        }
-                        if (cur_page + 1 < pages.length) {
-                            cur_page++;
-                            pagePlay();
-                        } else {
-                            cur_page = 0;
-                            is_playing = false;
-                            play_button.style.fill = gray;
-                            play_button.style.stroke = gray;
-                        }
-                    }
-                } else {
-                    let next = this.buildME(this.parts[i], cur.next);
-                    next.elapsed = cur.elapsed - cur.dur;
-                    next.style.fill = blue;
-                    this.state[i] = next;
-                }
-            }
-        }
-    }
-
-    buildParts() {
-        let parts = [];
-
-        let measureElement = data[i];
-        let meStyle = this.svgArrays[measureElement.class][measureElement.index].style;
-        let duration = measureElement.duration*1000;
-        let next = i + 1;
-        return {"style": meStyle, "dur": duration, "elapsed": 0, "next": next};
-    }
-
-    stop() {
-        this.blackout();
-    }
-
-    blackout() {
-        for (let x of this.state) {
-            x.style.fill = "black";
-        }
-    }
-}
-
-class Metronome {
-    constructor() {
-        this.onTick = null;
-        this.t0 = 0;
-        this.int = 0;
-        this.tickache = null;
-    }
-
-    tick() {
-        let dt = music.currentTime - this.t0;
-        if (this.onTick != null) {
-            this.onTick(dt);
-        }
-        this.t0 = music.currentTime;
-    }
-
-    start() {
-        this.t0 = music.currentTime;
-        this.int = window.setInterval(() => {this.tick();}, 50);
-    }
-
-    stop() {
-        window.clearInterval(this.int);
-    }
-
-    pause() {
-        this.tickache = this.onTick;
-        this.onTick = (dt) => {
-            this.tickache(dt);
-            music.pause();
-            window.clearInterval(this.int);
-        }
-    }
-
-    resume() {
-        this.t0 = music.currentTime;
-        this.onTick = this.tickache;
-        this.int = window.setInterval(() => {this.tick();}, 50);
     }
 }
