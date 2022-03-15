@@ -150,12 +150,13 @@ function buildPage(data, page_num) {
         let first = true;
         for (let measure_element of part_data) {                
             let style = svg_arrays[measure_element.class][measure_element.index].style;
-            parts[i][measure_element.start] = {"style": style, "page": page_num};
+            let element = {"style": style, "page": page_num, "start":measure_element.start}
+            parts[i][measure_element.start] = element;
             part_starts[i].push(measure_element.start);
 
             if (first) {
                 first = false;
-                page_inits[page_num][i] = {"style": style, "page": page_num};
+                page_inits[page_num][i] = element;
             }
         }
     }
@@ -257,14 +258,10 @@ function play() {
 
             is_paused = false;
         } else {
-            if (display_page != cur_page) {
-                sheets[cur_page].style.display = "block";
-                sheets[display_page].style.display = "none";
-                display_page = cur_page;
-            }
             for (let i = 0; i < cur_elements.length; i++) {
                 cur_elements[i] = page_inits[cur_page][i];
             }
+            music.currentTime = cur_elements[0].start;
         }
 
         is_playing = true;
@@ -313,6 +310,9 @@ function next() {
         sheets[display_page].style.display = "none";
         display_page++;
         sheets[display_page].style.display = "block";
+        if (!is_playing && !is_paused) {
+            cur_page++;
+        }
     }
 }
 function prev() {
@@ -320,5 +320,8 @@ function prev() {
         sheets[display_page].style.display = "none";
         display_page--;
         sheets[display_page].style.display = "block";
+        if (!is_playing && !is_paused) {
+            cur_page--;
+        }
     }
 }
