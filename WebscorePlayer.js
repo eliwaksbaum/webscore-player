@@ -239,6 +239,7 @@ function tick() {
 }
 
 function over() {
+    is_playing = false;
     play_button.style.fill = gray;
     play_button.style.stroke = gray;
     window.clearInterval(interval);
@@ -273,22 +274,12 @@ function play() {
 function stop() {
     music.pause();
     music.currentTime = 0;
-    is_playing = false;
     is_paused = false;
 
-    play_button.style.fill = gray;
-    play_button.style.stroke = gray;
     pause_button.style.fill = gray;
     pause_button.style.stroke = gray;
 
-    if (display_page != 0) {
-        sheets[0].style.display = "block"
-        sheets[display_page].style.display = "none";
-    }
-    cur_page = 0;
-    display_page = 0;
-
-    window.clearInterval(interval);
+    over();
 }
 
 function pause() {
