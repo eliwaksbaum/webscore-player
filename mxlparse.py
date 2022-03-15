@@ -9,10 +9,12 @@ def parse(score):
     
     pages = []
     time = 0
+    tempo = 0
     for page in page_streams:
-        pt = getParts(page, tempos, time)
-        parts = pt[0]
-        time = pt[1]
+        ptt = getParts(page, tempos, time, tempo)
+        parts = ptt[0]
+        time = ptt[1]
+        tempo = ptt[2]
         pages.append(parts)
 
     return pages
@@ -31,17 +33,18 @@ def getTempos(pages):
 
     return tempos
 
-def getParts(page, tempos, start_time):
+def getParts(page, tempos, start_time, start_tempo):
     page_parts = page.getElementsByClass(stream.Part)
     parts = []
     cur_note = 0
     cur_rest = 0
-    end = 0
+    end_time = 0
+    end_tempo = 0
 
     for i in range(len(page_parts) - 1, -1, -1):
         part = page_parts[i]
-        cur_tempo_index = 0
-        cur_tempo = tempos[0]
+        cur_tempo_index = start_tempo
+        cur_tempo = tempos[cur_tempo_index]
         untimed_part = []
 
         measure_streams = part.getElementsByClass(stream.Measure)
@@ -77,10 +80,11 @@ def getParts(page, tempos, start_time):
         measure_map = repeat.Expander(part).measureMap()
         je = setStarts(untimed_part, measure_map, start_time)
         js_part = je[0]
-        end = je[1]
+        end_time = je[1]
+        end_tempo = cur_tempo_index
         parts.append(js_part)
 
-    return (parts, end)
+    return (parts, end_time, end_tempo)
 
 def setStarts(measures, map, start):
     part = []
