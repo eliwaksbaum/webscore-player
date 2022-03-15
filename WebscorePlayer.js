@@ -263,7 +263,8 @@ function play() {
             for (let i = 0; i < cur_elements.length; i++) {
                 cur_elements[i] = page_inits[cur_page][i];
             }
-            music.currentTime = cur_elements[0].start;
+            let page_start = cur_elements[0].start;
+            music.currentTime = page_start == 0? 0 : page_start + .000001;  //rounding can put currentTime before the start, which mucks things up
         }
 
         is_playing = true;
