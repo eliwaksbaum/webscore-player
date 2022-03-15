@@ -86,16 +86,13 @@ def setStarts(measures, map, start):
     part = []
     cur_time = start
 
-    print(map)
-
     for i in map:
         for me in measures[i]:
             jsme = {"start": cur_time, "index": me["index"], "class": me["class"]}
             cur_time += me["duration"]
             part.append(jsme)
 
-    last_end = cur_time + measures[map[-1]][-1]["duration"]
-    return (part, last_end)
+    return (part, cur_time)
 
 score = converter.parse(sys.argv[1])
 pages = parse(score)
