@@ -224,11 +224,8 @@ function colorElements(olds, news) {
 function tick() {
     let news = getElementsFromTime(music.currentTime);
     if (music.currentTime == music.duration) {
-        news = [];
-        play_button.style.fill = gray;
-        play_button.style.stroke = gray;
-        window.clearInterval(interval);
-        return
+        over();
+        return;
     }
 
     colorElements(cur_elements, news);
@@ -237,6 +234,15 @@ function tick() {
     if (news[0].page != cur_page && cur_page == display_page) {
         cur_page++;
         next();
+    }
+}
+
+function over() {
+    play_button.style.fill = gray;
+    play_button.style.stroke = gray;
+    window.clearInterval(interval);
+    for (let e of cur_elements) {
+        e.style.fill = "black";
     }
 }
 
