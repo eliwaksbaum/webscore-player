@@ -169,6 +169,10 @@ function buildPage(data, page_num) {
 
 function timeHash(time, starts) {
     let i_guess = innerHash(time, starts, 0, starts.length);
+    if (i_guess == 0) {
+        return 0;
+    }
+
     let hi = starts[i_guess + 1];
     let mid = starts[i_guess];
     let lo = starts[i_guess - 1];
