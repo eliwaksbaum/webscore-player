@@ -100,6 +100,7 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     sheetHolder.className = "holder";
     sheetHolder.style.background = "white";
     sheetHolder.style.border = "3px black solid";
+    sheetHolder.style.userSelect = "none";
     canvas.appendChild(sheetHolder);
 
     for (let i = 0; i < data.length; i++) {
