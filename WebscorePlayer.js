@@ -259,6 +259,7 @@ function play() {
 
             is_paused = false;
         } else {
+            cur_page = display_page;
             for (let i = 0; i < cur_elements.length; i++) {
                 cur_elements[i] = page_inits[cur_page][i];
             }
