@@ -228,6 +228,7 @@ function tick() {
         play_button.style.fill = gray;
         play_button.style.stroke = gray;
         window.clearInterval(interval);
+        return
     }
 
     colorElements(cur_elements, news);
