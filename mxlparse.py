@@ -101,6 +101,6 @@ def setStarts(measures, map, start):
 score = converter.parse(sys.argv[1])
 pages = parse(score)
 
-name = sys.argv[1].split(".")[-2]
+name = sys.argv[1].split(".mxl")[-2]
 with open(name + ".json", "w") as file:
     json.dump(pages, file)
