@@ -1,7 +1,7 @@
 # Webscore Player (In Development)
 A tool for playing MuseScore projects in your web browser
 
-See a [Demo](eli.waksbaum.com/secrets/dancing_demo)
+See a [Demo](https://eli.waksbaum.com/secrets/dancing_demo)
 
 ## How to Use
 In MuseScore, export your project to MusicXML, MP3, and SVG
