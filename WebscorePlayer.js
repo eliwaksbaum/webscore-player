@@ -169,46 +169,53 @@ function buildPage(data, page_num) {
     }
 }
 
-function timeHash(time, starts) {
-    let i_guess = innerHash(time, starts, 0, starts.length);
-    if (i_guess == 0) {
-        return 0;
-    }
+// function timeHash(time, starts) {
+//     let i_guess = innerHash(time, starts, 0, starts.length);
+//     if (i_guess == 0) {
+//         return 0;
+//     }
 
-    let hi = starts[i_guess + 1];
-    let mid = starts[i_guess];
-    let lo = starts[i_guess - 1];
+//     let hi = starts[i_guess + 1];
+//     let mid = starts[i_guess];
+//     let lo = starts[i_guess - 1];
 
-    if (time > hi) {
-        return hi;
-    }
-    else if (time > mid) {
-        return mid;
-    }
-    else {
-        return lo;
-    }
-}
+//     if (time > hi) {
+//         return hi;
+//     }
+//     else if (time > mid) {
+//         return mid;
+//     }
+//     else {
+//         return lo;
+//     }
+// }
 
-function innerHash(time, starts, lo, hi) {
+function timeHash(time, starts, lo, hi) {
     let mid = lo + Math.floor((hi-lo)/2)
     let guess = starts[mid];
 
-    if (time == guess || hi <= lo) {
-        return mid;
+    // if (time == guess) {
+    //     return time;
+    // }
+    if (hi - lo <= 1) {
+        if (time > hi) {
+            return starts[hi];
+        } else {
+            return starts[lo];
+        }
     }
     else if (time < guess) {
-        return innerHash(time, starts, lo, mid - 1);
+        return timeHash(time, starts, lo, mid - 1);
     }
     else {
-        return innerHash(time, starts, mid + 1, hi);
+        return timeHash(time, starts, mid, hi);
     }
 }
 
 function getElementsFromTime(time) {
     let elements = new Array(parts.length);
     for (let i = 0; i < parts.length; i++) {
-        let key = timeHash(time, part_starts[i]);
+        let key = timeHash(time, part_starts[i], 0, part_starts[i].length - 1);
         elements[i] = parts[i][key];
     }
     return elements;
