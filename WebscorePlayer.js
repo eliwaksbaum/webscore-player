@@ -169,42 +169,17 @@ function buildPage(data, page_num) {
     }
 }
 
-// function timeHash(time, starts) {
-//     let i_guess = innerHash(time, starts, 0, starts.length);
-//     if (i_guess == 0) {
-//         return 0;
-//     }
-
-//     let hi = starts[i_guess + 1];
-//     let mid = starts[i_guess];
-//     let lo = starts[i_guess - 1];
-
-//     if (time > hi) {
-//         return hi;
-//     }
-//     else if (time > mid) {
-//         return mid;
-//     }
-//     else {
-//         return lo;
-//     }
-// }
-
 function timeHash(time, starts, lo, hi) {
     let mid = lo + Math.floor((hi-lo)/2)
-    let guess = starts[mid];
 
-    // if (time == guess) {
-    //     return time;
-    // }
     if (hi - lo <= 1) {
-        if (time > hi) {
+        if (time > starts[hi]) {
             return starts[hi];
         } else {
             return starts[lo];
         }
     }
-    else if (time < guess) {
+    else if (time < starts[mid]) {
         return timeHash(time, starts, lo, mid - 1);
     }
     else {
