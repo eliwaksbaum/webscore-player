@@ -156,13 +156,15 @@ function buildPage(data, page_num) {
             part_starts[i].push(measure_element.start);
 
             svg.addEventListener("click", () => {
-                svg.style.fill = blue;
-                if (selected != null) {
-                    selected.style.fill = "black";
+                if (!is_playing && !is_paused) {
+                    svg.style.fill = blue;
+                    if (selected != null) {
+                        selected.style.fill = "black";
+                    }
+                    selected = svg;
+                    music.currentTime = element.start;
                 }
-                selected = svg;
-                music.currentTime = element.start;
-            })
+            });
 
             if (first) {
                 first = false;
@@ -175,6 +177,13 @@ function buildPage(data, page_num) {
         for (let starts of part_starts) {
             starts.sort((a, b) => a - b);
         }
+    }
+}
+
+function clearSelect() {
+    if (selected != null) {
+        selected.style.fill = "black";
+        selected = null;
     }
 }
 
@@ -293,6 +302,7 @@ function next() {
         if (!is_playing && !is_paused) {
             cur_page++;
         }
+        clearSelect();
     }
 }
 function prev() {
@@ -303,5 +313,6 @@ function prev() {
         if (!is_playing && !is_paused) {
             cur_page--;
         }
+        clearSelect();
     }
 }
