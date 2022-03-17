@@ -31,5 +31,4 @@ Parameters to `WebscoreInit()`:
 - Similary, grace notes are ordered after the notes they precede. This means the primary note is highlighted first, for a moment, and then the grace note is highlighted for the duration of the note.
   - One solution could be to order the notes as part of the parsing process, instead of relying on MuseScore's exporting convention. This might lead to compatibility with other score-writing softwares.
 
-- The MuseScore feature where you can click on any note to start playback from that point is definitely possible. Since this isn't an 
-editor and I doubt people are playing along, this is a secondary goal that I might return to implement at a later date.
+- Clicking to select half and whole notes is pretty difficult since the selectable area is so small.
