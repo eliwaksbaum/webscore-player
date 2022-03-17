@@ -101,6 +101,7 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     sheetHolder.style.background = "white";
     sheetHolder.style.border = "3px black solid";
     sheetHolder.style.userSelect = "none";
+    sheetHolder.addEventListener("click", clearSelect);
     canvas.appendChild(sheetHolder);
 
     for (let i = 0; i < data.length; i++) {
@@ -172,11 +173,19 @@ function buildPage(data, page_num) {
             }
         }
     }
+    page_SVG.addEventListener("click", deSelect);
 
     if (pages_built == data.length) {
         for (let starts of part_starts) {
             starts.sort((a, b) => a - b);
         }
+    }
+}
+
+function deSelect(e) {
+    let c = e.target.className.baseVal;
+    if (c != "Note" && c != "Rest") {
+        clearSelect();
     }
 }
 
