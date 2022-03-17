@@ -9,7 +9,7 @@ var num_pages;
 var pages_built = 0;
 var parts;                  //a list of part objects, keys are the measure elements' starts and values are {style, pagenum}
 var part_starts;            //a list of part lists, all of the measure elements' starts
-var page_inits;            //page_inits[0][1] gives the style of the first measure element in the second part on the first page
+var page_starts;            //a list of the start times of the first elements for each page
 var cur_page = 0;
 
 var is_playing = false;
@@ -69,8 +69,7 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
         for (let i = 0; i < parts.length; parts[i++] = {});
     part_starts = new Array(data[0].length);
         for (let i = 0; i < part_starts.length; part_starts[i++] = []);
-    page_inits = new Array(data.length);
-        for (let i = 0; i < page_inits.length; page_inits[i++] = new Array(data[0].length));
+    page_starts = new Array(data.length);
     cur_elements = new Array(data[0].length);
     svg_paths = svgsrcs;
 
@@ -157,7 +156,7 @@ function buildPage(data, page_num) {
 
             if (first) {
                 first = false;
-                page_inits[page_num][i] = element;
+                page_starts[page_num] = element.start;
             }
         }
     }
@@ -170,7 +169,7 @@ function buildPage(data, page_num) {
 }
 
 function timeHash(time, starts, lo, hi) {
-    let mid = lo + Math.floor((hi-lo)/2)
+    let mid = lo + Math.floor((hi-lo)/2);
 
     if (hi - lo <= 1) {
         if (time > starts[hi]) {
@@ -196,12 +195,9 @@ function getElementsFromTime(time) {
     return elements;
 }
 
-function colorElements(olds, news) {
-    for (let old of olds) {
-        old.style.fill = "black";
-    }
-    for (let nu of news) {
-        nu.style.fill = blue;
+function colorElements(list, color) {
+    for (let e of list) {
+        e.style.fill = color;
     }
 }
 
@@ -212,7 +208,10 @@ function tick() {
         return;
     }
 
-    colorElements(cur_elements, news);
+    if (cur_elements[0] != null) {
+        colorElements(cur_elements, "black")
+    }
+    colorElements(news, blue);
     cur_elements = news;
 
     if (news[0].page != cur_page && cur_page == display_page) {
@@ -226,9 +225,7 @@ function over() {
     play_button.style.fill = gray;
     play_button.style.stroke = gray;
     window.clearInterval(interval);
-    for (let e of cur_elements) {
-        e.style.fill = "black";
-    }
+    colorElements(cur_elements, "black");
 }
 
 function play() {
@@ -241,13 +238,10 @@ function play() {
             pause_button.style.stroke = gray;
 
             is_paused = false;
-        } else {
+        }
+        else {
             cur_page = display_page;
-            for (let i = 0; i < cur_elements.length; i++) {
-                cur_elements[i] = page_inits[cur_page][i];
-            }
-            let page_start = cur_elements[0].start;
-            music.currentTime = page_start == 0? 0 : page_start + .000001;  //rounding can put currentTime before the start, which mucks things up
+            music.currentTime = page_starts[cur_page] == 0? 0 : page_starts[cur_page] + .000001;  //rounding can put currentTime before the start, which mucks things up
         }
 
         is_playing = true;
