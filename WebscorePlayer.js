@@ -21,6 +21,7 @@ var pause_button;
 var stop_button;
 
 var cur_elements;
+var selected;
 var blue = "#0643f9";
 var gray = "#2e2e2e";
 
@@ -149,10 +150,19 @@ function buildPage(data, page_num) {
         let part_data = page_data[i];
         let first = true;
         for (let measure_element of part_data) {                
-            let style = svg_arrays[measure_element.class][measure_element.index].style;
-            let element = {"style": style, "page": page_num, "start":measure_element.start}
+            let svg = svg_arrays[measure_element.class][measure_element.index];
+            let element = {"style": svg.style, "page": page_num, "start": measure_element.start}
             parts[i][measure_element.start] = element;
             part_starts[i].push(measure_element.start);
+
+            svg.addEventListener("click", () => {
+                svg.style.fill = blue;
+                if (selected != null) {
+                    selected.style.fill = "black";
+                }
+                selected = svg;
+                music.currentTime = element.start;
+            })
 
             if (first) {
                 first = false;
@@ -239,7 +249,7 @@ function play() {
 
             is_paused = false;
         }
-        else {
+        else if (selected == null) {
             cur_page = display_page;
             music.currentTime = page_starts[cur_page] == 0? 0 : page_starts[cur_page] + .000001;  //rounding can put currentTime before the start, which mucks things up
         }
