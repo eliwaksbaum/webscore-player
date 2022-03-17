@@ -96,6 +96,8 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     panelsvg.getElementById("next").addEventListener("click", next);
     panelsvg.getElementById("prev").addEventListener("click", prev);
 
+    window.addEventListener("keydown", handleKey);
+
     let sheetHolder = document.createElement("div");
     sheetHolder.className = "holder";
     sheetHolder.style.background = "white";
@@ -140,6 +142,28 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
         }
     `
     head.appendChild(style);
+}
+
+function handleKey(e) {
+    switch (e.key) {
+        case " ":
+        case "Spacebar":
+            e.preventDefault();
+            if (is_playing) {
+                pause();
+            } else {
+                play();
+            }
+            break;
+        case "ArrowLeft":
+        case "Left":
+            prev();
+            break;
+        case "ArrowRight":
+        case "Right":
+            next();
+            break;
+    }
 }
 
 function buildPage(data, page_num) {
