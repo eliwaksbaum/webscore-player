@@ -182,10 +182,10 @@ function buildPage(data, page_num) {
 
             svg.addEventListener("click", () => {
                 if (!is_playing && !is_paused) {
-                    svg.style.fill = blue;
                     if (selected != null) {
                         selected.style.fill = "black";
                     }
+                    svg.style.fill = blue;
                     selected = svg;
                     music.currentTime = element.start;
                 }
