@@ -31,4 +31,6 @@ Parameters to `WebscoreInit()`:
 - Similary, grace notes are ordered after the notes they precede. This means the primary note is highlighted first, for a moment, and then the grace note is highlighted for the duration of the note.
   - One solution could be to order the notes as part of the parsing process, instead of relying on MuseScore's exporting convention. This might lead to compatibility with other score-writing softwares.
 
+- This hasn't been tested with a wide variety of repeat structures. I'd imagine dal segno and da capo would be ok, but I'm pretty sure a coda would break it.
+
 - Clicking to select half and whole notes is pretty difficult since the selectable area is so small.
