@@ -96,7 +96,7 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
     panelsvg.getElementById("next").addEventListener("click", next);
     panelsvg.getElementById("prev").addEventListener("click", prev);
 
-    window.addEventListener("keydown", handleKey);
+    canvas.addEventListener("keydown", handleKey);
 
     let sheetHolder = document.createElement("div");
     sheetHolder.className = "holder";
@@ -157,10 +157,12 @@ function handleKey(e) {
             break;
         case "ArrowLeft":
         case "Left":
+            e.preventDefault();
             prev();
             break;
         case "ArrowRight":
         case "Right":
+            e.preventDefault();
             next();
             break;
     }
