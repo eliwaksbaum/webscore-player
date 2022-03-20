@@ -181,12 +181,18 @@ function buildPage(data, page_num) {
             parts[i][measure_element.start] = element;
             part_starts[i].push(measure_element.start);
 
-            svg.addEventListener("click", () => {
-                if (!is_playing && !is_paused) {
+            svg.addEventListener("click", () => {           //For a repeated section, multiple events will be fired, and the playback will be set
+                if (!is_playing) {                          //to the latest start time. Not entirely ideal, but functional.
+                    if (is_paused) {
+                        let curs = getElementsFromTime(music.currentTime);
+                        colorElements(curs, "black");
+                    }
+
                     if (selected != null) {
                         selected.style.fill = "black";
                     }
                     svg.style.fill = blue;
+
                     selected = svg;
                     music.currentTime = element.start;
                 }
