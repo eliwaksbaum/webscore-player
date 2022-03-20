@@ -76,6 +76,7 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
 
     canvas = document.getElementById("player");
     canvas.style.margin = "auto";
+    canvas.addEventListener("click", () => {sheets[cur_page].contentWindow.focus();});
 
     let panel = document.createElement("div");
     panel.innerHTML = panel_HTML;
@@ -95,8 +96,6 @@ function WebscoreInit(json, svgsrcs, audiosrc) {
 
     panelsvg.getElementById("next").addEventListener("click", next);
     panelsvg.getElementById("prev").addEventListener("click", prev);
-
-    window.addEventListener("keydown", handleKey);
 
     let sheetHolder = document.createElement("div");
     sheetHolder.className = "holder";
@@ -157,10 +156,12 @@ function handleKey(e) {
             break;
         case "ArrowLeft":
         case "Left":
+            e.preventDefault();
             prev();
             break;
         case "ArrowRight":
         case "Right":
+            e.preventDefault();
             next();
             break;
     }
