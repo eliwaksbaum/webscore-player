@@ -171,6 +171,7 @@ function buildPage(data, page_num) {
     let page_data = data[page_num];
     let page_SVG = sheets[page_num].contentDocument.getElementsByTagName("svg")[0];
     let svg_arrays = {"Note": page_SVG.getElementsByClassName("Note"), "Rest": page_SVG.getElementsByClassName("Rest")};
+
     for (let i = 0; i < page_data.length; i++) {
         let part_data = page_data[i];
         let first = true;
@@ -198,6 +199,7 @@ function buildPage(data, page_num) {
         }
     }
     page_SVG.addEventListener("click", deSelect);
+    page_SVG.addEventListener("keydown", handleKey);
 
     if (pages_built == data.length) {
         for (let starts of part_starts) {
