@@ -187,6 +187,7 @@ function buildPage(data, page_num) {
                     if (is_paused) {
                         let curs = getElementsFromTime(music.currentTime);
                         colorElements(curs, "black");
+                        cur_page = element.page;
                     }
 
                     if (selected != null) {
