@@ -1,7 +1,7 @@
 # Webscore Player
 A tool for playing MuseScore projects in your web browser
 
-See it [in action](https://eli.waksbaum.com/projects/?tag=Music).
+See it [in action](https://eli.waksbaum.com/clarinet/).
 
 ## How to Use
 In MuseScore, export your project to MusicXML, MP3, and SVG
